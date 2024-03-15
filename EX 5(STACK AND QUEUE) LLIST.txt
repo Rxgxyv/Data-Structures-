@@ -1,0 +1,493 @@
+#include<iostream>
+using namespace std;
+
+class CBook
+{
+    int bookId;
+    string bookName;
+    double price;
+public:
+    CBook();
+    CBook(int, string, double);
+    bool operator ==(CBook);
+    void displayBook();
+    int getId();
+    string getName();
+    double getPrice();
+};
+
+class Node
+{
+
+    CBook data;
+    Node* next;
+public:
+    Node(CBook, Node*);
+    CBook getData();
+    Node* getNext();
+    void setData(CBook);
+    void setNext(Node*);
+};
+
+class Stack
+{
+    Node* top;
+public:
+    Stack(Node*);
+    int push(Node*);
+    Node* pop();
+    Node* peek();
+    void display();
+    void makeEmpty();
+    Node* search(Node*);
+};
+
+class queue
+{
+    Node* front;
+    Node* rear;
+public:
+    queue(Node*, Node*);
+    int enqueue(Node*);
+    Node* dequeue();
+    void display();
+    void displayFront();
+    void displayRear();
+    void makeEmpty();
+    Node* search(Node*);
+};
+[21bcs176@mepcolinux ex5]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+        bookId = 0;
+        bookName = "";
+        price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+        bookId = id;
+        bookName = n;
+        price = p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+void CBook::displayBook()
+{
+        cout<<"____________________"<<endl;
+        cout<<"ID: "<<bookId<<endl;
+        cout<<"Name: "<<bookName<<endl;
+        cout<<"Price: "<<price<<endl;
+        cout<<"____________________"<<endl;
+}
+int CBook::getId()
+{
+        return bookId;
+}
+
+string CBook::getName()
+{
+        return bookName;
+}
+
+double CBook::getPrice()
+{
+        return price;
+}
+
+Node::Node(CBook d, Node* n)
+{
+        next = n;
+        data = d;
+}
+
+CBook Node::getData()
+{
+        return data;
+}
+
+Node* Node::getNext()
+{
+        return next;
+}
+
+void Node::setNext(Node* n)
+{
+        next = n;
+}
+
+void Node::setData(CBook d)
+{
+        data = d;
+}
+
+Stack::Stack(Node* t)
+{
+    top = t;
+}
+
+
+
+int Stack::push(Node* ele)
+{
+    ele->setNext(top);
+    top = ele;
+    return 1;
+}
+
+Node* Stack::pop()
+{
+    if(top == NULL)return NULL;
+    Node* t = top;
+    top = top->getNext();
+    return t;
+}
+
+Node* Stack::peek()
+{
+    return top;
+}
+
+void Stack::display()
+{
+    if(top == NULL)
+    {
+        cout<<"\nThe Stack is empty\n";
+        return;
+    }
+    cout<<"Elements in the stack from top to bottom\n";
+    Node* curr = top;
+    while(curr)
+    {
+        curr->getData().displayBook();
+        cout<<endl;
+        curr = curr->getNext();
+    }
+}
+
+void Stack::makeEmpty()
+{
+    Node* t = top;
+    top = NULL;
+    delete t;
+}
+
+Node* Stack::search(Node* ele)
+{
+    if(top == NULL)return NULL;
+
+    Node* curr = top;
+    while(curr)
+    {
+        if(curr->getData() == ele->getData())
+        {
+            return curr;
+        }
+        curr = curr->getNext();
+    }
+    return NULL;
+}
+
+
+queue::queue(Node* f, Node* r)
+{
+    front = f;
+    rear = r;
+}
+
+int queue::enqueue(Node* ele)
+{
+    if(front == NULL && rear ==  NULL)
+    {
+        front = rear = ele;
+        return 1;
+    }
+
+    rear->setNext(ele);
+    rear = rear->getNext();
+    return 1;
+}
+
+Node* queue::dequeue()
+{
+    if(front == NULL)return NULL;
+
+    Node* t = front;
+    front = front->getNext();
+    return t;
+}
+
+void queue::display()
+{
+    if(front == NULL && rear == NULL)
+    {
+        cout<<"The Queue is Empty\n";
+        return;
+    }
+
+    Node* curr = front;
+    while(curr)
+    {
+        curr->getData().displayBook();
+        curr = curr->getNext();
+    }
+}
+
+void queue::displayFront()
+{
+    if(front == NULL)
+    {
+        cout<<"No element to display\n";
+        return;
+    }
+    cout<<"The front element is: \n";
+    front->getData().displayBook();
+}
+
+void queue::displayRear()
+{
+    if(rear == NULL)
+    {
+        cout<<"No element to display\n";
+        return;
+    }
+
+    cout<<"The rear element is: \n";
+    rear->getData().displayBook();
+}
+
+void queue::makeEmpty()
+{
+    front = rear = NULL;
+}
+
+Node* queue::search(Node* ele)
+{
+    if(front == NULL || rear == NULL)return NULL;
+
+    Node* curr = front;
+    while(curr)
+    {
+        if(curr->getData() == ele->getData())
+        {
+            return curr;
+        }
+        curr = curr->getNext();
+    }
+    return NULL;
+}
+[21bcs176@mepcolinux ex5]$cat bookapp.cpp
+#include "book.h"
+
+void stackOperations(Stack&);
+void queueOperations(queue&);
+
+int main()
+{
+    Stack stack(NULL);
+    queue q(NULL, NULL);
+
+    int ch;
+    do
+    {
+        cout<<"\nBook Management System\n";
+        cout<<"To Perform operations on: \n";
+        cout<<"Press 1 To Perform Stack\n";
+        cout<<"Press 2 To Perform Queue\n";
+        cout<<"Press 3 to Exit\n";
+        cout<<"Enter your choice: ";
+        cin >> ch;
+        switch(ch)
+        {
+        case 1:
+        {
+            stackOperations(stack);
+            break;
+        }
+        case 2:
+        {
+            queueOperations(q);
+            break;
+        }
+        }
+    } while (ch > 0 && ch < 3);
+
+}
+
+void stackOperations(Stack& stack)
+{
+    int ch;
+    do
+    {
+        cout<<"\nStack Operations\n";
+        cout<<"1. Push\n";
+        cout<<"2. Pop\n";
+        cout<<"3. Peek\n";
+        cout<<"4. Display\n";
+        cout<<"5. Make Empty\n";
+        cout<<"6. Search\n";
+        cout<<"7. Go Back\n";
+        cout<<"Enter your choice: ";
+        cin >> ch;
+
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            Node* t = new Node(CBook(id, name, price), NULL);
+            int status = stack.push(t);
+            if(status == 1)
+                cout<<"Element successfully pushed\n";
+            else
+                cout<<"Element not inserted\n";
+            break;
+        }
+        case 2:
+        {
+            Node* ele = stack.pop();
+            if(ele == NULL)
+            {
+                cout<<"No element to pop\n";
+                break;
+            }
+            cout<<"The deleted element is: \n";
+            ele->getData().displayBook();
+            break;
+        }
+        case 3:
+        {
+            Node* ele = stack.peek();
+            if(ele == NULL)
+            {
+                cout<<"No element to peek\n";
+                continue;
+            }
+            cout<<"The top element is: \n";
+            ele->getData().displayBook();
+            break;
+        }
+        case 4:
+        {
+            stack.display();
+            break;
+        }
+        case 5:
+        {
+            stack.makeEmpty();
+            break;
+        }
+        case 6:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            Node* t = new Node(CBook(id, name, price), NULL);
+            Node* ele = stack.search(t);
+            if(ele == NULL)
+                cout<<"Element not found\n";
+            else
+                cout<<"Element found\n";
+            break;
+        }
+        }
+    } while (ch > 0 && ch < 7);
+
+}
+
+
+void queueOperations(queue& q)
+{
+    int ch;
+    do
+    {
+        cout<<"\nQueue Operations\n";
+        cout<<"1. Enqueue\n";
+        cout<<"2. Dequeue\n";
+        cout<<"3. Display\n";
+        cout<<"4. Display front\n";
+        cout<<"5. Display rear\n";
+        cout<<"6. Make Empty\n";
+        cout<<"7. Search\n";
+        cout<<"8. Go Back\n";
+        cout<<"Enter your chocie: ";
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            Node* t = new Node(CBook(id, name, price), NULL);
+            int status = q.enqueue(t);
+            if(status == 1)
+                cout<<"Element enqueued successfully\n";
+            else
+                cout<<"Element not inserted\n";
+            break;
+        }
+        case 2:
+        {
+            Node* ele = q.dequeue();
+            if(ele == NULL)
+            {
+                cout<<"No element to delete\n";
+                continue;
+            }
+            cout<<"The deleted element is: \n";
+            ele->getData().displayBook();
+            break;
+        }
+        case 3:
+        {
+            q.display();
+            break;
+        }
+        case 4:
+        {
+            q.displayFront();
+            break;
+        }
+        case 5:
+        {
+            q.displayRear();
+            break;
+        }
+        case 6:
+        {
+            q.makeEmpty();
+            break;
+        }
+        case 7:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            Node* t = new Node(CBook(id, name, price), NULL);
+            Node* ele = q.search(t);
+            if(ele == NULL)
+                cout<<"Element not found\n";
+            else
+                cout<<"Element found\n";
+            break;
+        }
+
+        }
+    } while (ch > 0 && ch < 8);
+
+}

@@ -1,0 +1,476 @@
+#include <iostream>
+#include<iostream>
+using namespace std;
+class CBook
+{
+    public:
+    string bookname;
+    int ID;
+    float price;
+    CBook();
+    CBook(string,int,float);
+    void displayPro();
+    bool operator ==(CBook);
+};
+class CNode
+{
+    public:
+    CBook book;
+    CNode* left;
+    CNode* right;
+    int height;
+    CNode();
+    CNode(CBook,CNode*,CNode*);
+    void displayNode();
+};
+class CAvl
+{
+    public:
+    CNode* root;
+    CAvl(CNode*);
+    int Bfactor(CNode*);
+    CNode* Balance(CNode*);
+    CNode* InsertNode(CNode*,CNode*);
+    CNode* DeleteNode(CNode*,CNode*);
+    CNode* FindMin(CNode*);
+    CNode* FindMax(CNode*);
+    int getHeight(CNode*);
+    int getHeight(CNode*,CNode*);
+    void Inorder(CNode*);
+    void Preorder(CNode*);
+    void Postorder(CNode*);
+    CNode* Ll_rotate(CNode*);
+    CNode* Rr_rotate(CNode*);
+    CNode* Lr_rotate(CNode*);
+    CNode* Rl_rotate(CNode*);
+    int SearchNode(CNode*,CNode*);
+    int isEmpty();
+    void DeleteAll();
+    void DisplayRoot();
+};
+[21bcs176@mepcolinux ex7]$cat bookimp.cpp
+#include"book.h"
+CBook::CBook()
+{
+    bookname = " ";
+    ID = 0;
+    price = 0;
+}
+CBook::CBook(string n,int m,float p)
+{
+    bookname = n;
+    ID = m;
+    price = p;
+}
+void CBook::displayPro()
+{
+    cout<<"BookName:"<<bookname<<endl;
+    cout<<"Book ID:"<<ID<<endl;
+    cout<<"Book price:"<<price<<endl;
+}
+CNode::CNode(CBook b,CNode* l,CNode* r)
+{
+    book=b;
+    left = l;
+    right = r;
+}
+CAvl::CAvl(CNode* n)
+{
+    root = n;
+}
+void CAvl::DisplayRoot()
+{
+    if(root == NULL) cout<<"NULL\n";
+    else root->displayNode();
+}
+void CNode::displayNode()
+{
+    if(book == CBook())
+        cout<<"tree is empty\n";
+    else book.displayPro();
+}
+int CAvl::getHeight(CNode* root)
+{
+    if(root == NULL) return -1;
+    return max(getHeight(root->left),getHeight(root->right))+1;
+}
+int CAvl::Bfactor(CNode* root)
+{
+    if(root == NULL) return 0;
+    return getHeight(root->left) - getHeight(root->right);
+}
+CNode* CAvl::Balance(CNode* root)
+{
+    if(Bfactor(root) < -1 )
+    {
+        if(Bfactor(root->right) > 0) root = Rl_rotate(root);
+        else root = Rr_rotate(root);
+    }
+    else if(Bfactor(root) > 1)
+    {
+        if(Bfactor(root->left) > 0) root = Ll_rotate(root);
+        else root = Lr_rotate(root);
+    }
+    else root = root;
+    return root;
+}
+CNode* CAvl::Ll_rotate(CNode* root)
+{
+    CNode* temp = root->left;
+    root->left = temp->right;
+    temp->right = root;
+    return temp;
+}
+CNode*CAvl::Rr_rotate(CNode* root)
+{
+    CNode* temp = root->right;
+    root->right = temp->left;
+    temp->left = root;
+    return temp;
+}
+CNode* CAvl::Lr_rotate(CNode* root)
+{
+    CNode* temp = root->left;
+    root->left = Rr_rotate(temp);
+    return Ll_rotate(root);
+}
+CNode* CAvl::Rl_rotate(CNode* root)
+{
+    CNode* temp = root->right;
+    root->right = Ll_rotate(temp);
+    return Rr_rotate(root);
+}
+void CAvl::Inorder(CNode* tempRoot)
+{
+    if(tempRoot != NULL)
+    {
+        Inorder(tempRoot->left);
+        tempRoot->displayNode();
+        cout<<endl;
+        Inorder(tempRoot->right);
+    }
+}
+void CAvl::Preorder(CNode* tempRoot)
+{
+    if(tempRoot != NULL)
+    {
+        tempRoot->displayNode();
+        cout<<endl;
+        Preorder(tempRoot->left);
+        Preorder(tempRoot->right);
+    }
+}
+void CAvl::Postorder(CNode* tempRoot)
+{
+    if(tempRoot != NULL)
+    {
+        Postorder(tempRoot->left);
+        Postorder(tempRoot->right);
+        tempRoot->displayNode();
+        cout<<endl;
+    }
+}
+CNode* CAvl::FindMin(CNode* tempRoot)
+{
+    if(tempRoot == NULL) return NULL;
+    while(tempRoot->left != NULL)
+        tempRoot = tempRoot->left;
+    return tempRoot;
+}
+CNode* CAvl::FindMax(CNode* tempRoot)
+{
+    if(tempRoot == NULL) return NULL;
+    while(tempRoot->right != NULL)
+        tempRoot = tempRoot->right;
+    return tempRoot;
+}
+CNode* CAvl::InsertNode(CNode* root,CNode* n)
+{
+    if(root == NULL)
+    {
+        root = n;
+    }
+    else if(n->book.bookname < root->book.bookname)
+    {
+        root->left = InsertNode(root->left,n);
+        root = Balance(root);
+    }
+    else if(n->book.bookname > root->book.bookname)
+    {
+        root->right = InsertNode(root->right,n);
+        root = Balance(root);
+    }
+    else root = Balance(root);
+    return root;
+}
+CNode* CAvl::DeleteNode(CNode* root,CNode* n)
+{
+    if(root == NULL) return root;
+    else if(n->book.bookname < root->book.bookname) root->left = DeleteNode(root->left,n);
+    else if(n->book.bookname > root->book.bookname) root->right = DeleteNode(root->right,n);
+    else
+    {
+        if(root->left == NULL && root->right == NULL)
+        {
+            delete root;
+            root = NULL;
+        }
+       else if(root->left == NULL)
+        {
+            CNode* t1 = root;
+            root = root->right;
+            delete t1;
+        }
+        else if(root->right == NULL)
+        {
+            CNode* t1 = root;
+            root = root->left;
+            delete t1;
+        }
+        else
+        {
+            CNode* min = FindMin(root->right);
+            root->book.bookname = min->book.bookname;
+            root->book.ID = min->book.ID;
+            root->book.price = min->book.price;
+            root->right = DeleteNode(root->right,min);
+        }
+    }
+    return Balance(root);
+}
+int CAvl::SearchNode(CNode* root,CNode* n)
+{
+    if(root != NULL)
+    {
+        if(root->book.bookname > n->book.bookname) return SearchNode(root->left,n);
+        else if(root->book.bookname < n->book.bookname) return SearchNode(root->right,n);
+        else return 1;
+    }
+    return 0;
+}
+int CAvl::isEmpty()
+{
+    if(root == NULL) return 1;
+    else return 0;
+}
+void CAvl::DeleteAll()
+{
+    root = NULL;
+}
+bool CBook::operator ==(CBook t)
+{
+    if(bookname  == t.bookname && ID == t.ID && price == t.price) return true;
+    else return false;
+}
+int CAvl::getHeight(CNode* root, CNode* n)//To find the height of the Node
+{
+        if(root == NULL ) return -2;
+        CNode* temp = root ;
+        int t = -2 ;
+        while(temp != NULL)
+        {
+                if(temp->book.bookname > n->book.bookname) temp = temp->left;
+                else if(temp->book.bookname < n->book.bookname) temp = temp->right;
+                else
+                {
+                        t = getHeight(temp);
+                        break;
+                }
+        }
+
+        return t;
+}
+[21bcs176@mepcolinux ex7]$cat bookapp.cpp
+#include"book.h"
+
+int main()
+{
+  int ch,n = 1;
+  CAvl a(NULL);
+  while(n)
+  {
+    cout<<"-----------------------------"<<endl;
+    cout<<"BOOK MANAGEMENT SYSTEM"<<endl;
+    cout<<"-----------------------------"<<endl;
+    cout<<"1.Insert\n";
+    cout<<"2.Delete\n";
+    cout<<"3.Search\n";
+    cout<<"4.Inorder traversal\n";
+    cout<<"5.Postorder trasversal\n";
+    cout<<"6.Preorder trasversal\n";
+    cout<<"7.Display root\n";
+    cout<<"8.Minimum element\n";
+    cout<<"9.Maximum element\n";
+    cout<<"10.Make tree empty\n";
+    cout<<"11.Display height\n";
+    cout<<"12.Display all\n";
+    cout<<"13.Quit\n";
+    cout<<"_____________________________"<<endl;
+    cout<<"Enter your choice : ";
+    cin>>ch;
+    cout<<endl;
+    switch(ch)
+    {
+      case 1:
+      {
+        string n;
+        int m;
+        float p;
+        cout<<"Enter Book name,id,price\n";
+        cin>>n>>m>>p;
+        CNode* temp = new CNode(CBook(n,m,p),NULL,NULL);
+        int t1 = a.SearchNode(a.root,temp);
+        if(t1) cout<<"Book already Present\n";
+        else
+        {
+          temp = a.InsertNode(a.root,temp);
+          a.root = temp;
+          cout<<"Inserted successfully\n";
+        }
+         break;
+      }
+      case 2:
+      {
+       if(a.isEmpty()) cout<<"Tree is empty\n";
+       else
+       {
+        string n; int m;
+        float p;
+        cout<<"Enter book name,model,price\n";
+        cin>>n>>m>>p;
+        CNode* temp = new CNode(CBook(n,m,p),NULL,NULL);
+        int t1 = a.SearchNode(a.root,temp);
+        if(!t1) cout<<"Book not present\n";
+        else
+        {
+         temp = a.DeleteNode(a.root,temp);
+         a.root = temp;
+         cout<<"deleted book is \n";
+         CBook(n,m,p).displayPro();
+         }
+      }
+
+      break;
+      }
+      case 3:
+      {
+       if(a.isEmpty()) cout<<"Tree is empty\n";
+        else
+        {
+           string n; int m;
+           float p;
+           cout<<"Enter book name,ID,price\n";
+           cin>>n>>m>>p;
+           CNode* temp = new CNode(CBook(n,m,p),NULL,NULL);
+           int t1 = a.SearchNode(a.root,temp);
+           if(!t1) cout<<"Book not present\n";
+           else cout<<"Book is present\n";
+         }
+         break;
+       }
+       case 4:
+       {
+         if(a.isEmpty()) cout<<"Tree is empty\n";
+         a.Inorder(a.root);
+         break;
+       }
+       case 6:
+       {
+         if(a.isEmpty()) cout<<"Tree is empty\n";
+         a.Preorder(a.root);
+         break;
+       }
+       case 5:
+       {
+         if(a.isEmpty()) cout<<"Tree is empty\n";
+         a.Postorder(a.root);
+         break;
+       }
+       case 7:
+       {
+         a.DisplayRoot();
+         break;
+       }
+       case 8:
+       {
+        if(a.isEmpty()) cout<<"Tree is empty\n";
+        CNode* temp = a.FindMin(a.root);
+        temp->displayNode();
+        break;
+       }
+       case 9:
+       {
+        if(a.isEmpty()) cout<<"Tree is empty\n";
+        CNode* temp = a.FindMax(a.root);
+        temp->displayNode();
+        break;
+        }
+        case 10:
+        {
+          a.DeleteAll();
+          cout<<"Tree emptied\n";
+          break;
+        }
+        case 11:
+        {
+         int c;
+         do
+         {
+           cout<<"****************"<<endl;
+           cout<<"1.Node height\n";
+           cout<<"2.Tree height\n";
+           cout<<"3.Back\n";
+           cout<<"****************"<<endl;
+           cout<<"Enter your choice : ";
+           cin>>c;
+           cout<<endl;
+           switch(c)
+           {
+            case 1:
+            {
+              string n; int m;
+              float p;
+              cout<<"Enter book name,id,price\n";
+              cin>>n>>m>>p;
+              CNode* temp = new CNode(CBook(n,m,p),NULL,NULL);
+              int t1 = a.SearchNode(a.root,temp);
+              if(!t1) cout<<"book not present\n";
+              else
+              {
+                int t1 = a.getHeight(a.root,temp);
+                cout<<"The height of the node is "<<t1<<endl;
+               }
+              break;
+             }
+             case 2:
+              {
+               int t1 = a.getHeight(a.root);
+               cout<<"The height of the tree is "<<t1<<endl;
+                break;
+              }
+              case 3: break;
+              default: cout<<"Invalid input\n";
+            }
+             break;
+          }while(c<=3);
+        }
+    case 12:
+    {
+      cout<<"\nINORDER TRAVERSAL\n";
+      a.Inorder(a.root);
+      cout<<"\nPREORDER TRAVERSAL\n";
+      a.Preorder(a.root);
+      cout<<"\nPOSTORDER TRAVERSAL\n";
+      a.Postorder(a.root);
+      break;
+     }
+     case 13:
+     {
+        n=0;
+
+        break;
+     }
+     default: cout<<"Invalid input\n";
+     }
+  }
+}

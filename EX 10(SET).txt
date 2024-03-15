@@ -1,0 +1,240 @@
+#include<iostream>
+using namespace std;
+
+class CBook
+{
+    int bookId;
+    string bookName;
+    double price;
+
+public:
+    CBook();
+    CBook(int, string, double);
+    void displayBook();
+    bool operator ==(CBook);
+    int getId();
+};
+
+class CNode
+{
+public:
+    int val;
+    CBook data;
+    CNode();
+    CNode(int, CBook);
+    void displayNode();
+};
+
+class CSet
+{
+    int capacity;
+    CNode* arr;
+public:
+    CSet(int, CNode*);
+    void unionBySize(int, int);
+    int find(int);
+    void display();
+    int search(CBook);
+
+};
+[21bcs176@mepcolinux ex10]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+    bookId = 0;
+    bookName = "";
+    price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+    bookId = id;
+    bookName = n;
+    price = p;
+}
+
+bool CBook::operator ==(CBook b)
+{
+    return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+
+void CBook::displayBook()
+{
+    cout<<"|  ";
+    cout<<bookId<<"\t|  ";
+    cout<<bookName<<"\t|  ";
+    cout<<price<<endl;
+}
+
+CNode::CNode()
+{
+    val = -1;
+    data = CBook();
+}
+
+int CBook::getId()
+{
+    return bookId;
+}
+
+CNode::CNode(int v, CBook a)
+{
+    val = v;
+    data = a;
+}
+
+void CNode::displayNode()
+{
+    cout<<val<<"\t";
+    data.displayBook();
+}
+
+CSet::CSet(int cap, CNode* a)
+{
+    capacity = cap;
+    arr = a;
+}
+
+void CSet::unionBySize(int a, int b)
+{
+
+    int r1 = find(a);//find(1) = 1 -2
+    int r2 = find(b);//find(2) = 2 -1
+
+    if(r1 == r2)return;
+
+    if(arr[r1].val > arr[r2].val)//-2 >= -1 false
+    {
+        arr[r2].val += arr[r1].val;
+
+        arr[a].val = r2;
+    }
+    else
+    {
+        arr[r1].val += arr[r2].val;//arr[2] += arr[1] -1 + -2
+        arr[b].val = r1;
+    }
+}
+
+
+
+int CSet::find(int idx)
+{
+    if(arr[idx].val < 0)return idx;
+    return find(arr[idx].val);
+}
+
+void CSet::display()
+{
+    cout<<"Index\tValue\t|  ID\t|  Name\t|  Price\n";
+    cout<<"-------------------------------------------------\n";
+    for(int i = 0; i < capacity; i++)
+    {
+        cout<<i<<"\t";
+        arr[i].displayNode();
+    }
+}
+
+int CSet::search(CBook ele)
+{
+    for(int i = 0; i < capacity; i++)
+    {
+        if(arr[i].data == ele)return i;
+    }
+    return -1;
+}
+[21bcs176@mepcolinux ex10]$cat bookapp.cpp
+#include "book.h"
+int main()
+{
+    int cap;
+    cout<<"Enter the capacity: ";
+    cin>>cap;
+    CNode* arr = new CNode[cap];
+    for(int i = 0; i < cap; i++)
+    {
+        int id;
+        string name;
+        double price;
+        cout<<"Enter id, name, price: ";
+        cin>>id>>name>>price;
+        arr[i] = CNode(-1, CBook(id, name, price));
+    }
+    CSet set(cap, arr);
+
+
+    int ch;
+    do
+    {
+        cout<<"    BOOK MANAGEMENT SYSTEM     "<<endl;
+        cout<<"|*****************************|"<<endl;
+        cout<<"|1->Union By Size             |"<<endl;
+        cout<<"|2->Find()                    |"<<endl;
+        cout<<"|3->Display                   |"<<endl;
+        cout<<"|4->Exit                      |"<<endl;
+        cout<<"|_____________________________|"<<endl;
+        cout<<"Enter your choice: "<<endl;
+        cin >> ch;
+
+        switch (ch)
+        {
+        case 1:
+        {
+            int a, b;
+            set.display();
+            cout<<"Enter the two elements to union\n";
+            int id;
+            string name;
+            double price;
+            cout<<"Enter id, name, price: ";
+            cin>>id>>name>>price;
+            CBook x(id, name, price);
+            cout<<"Enter id, name, price: ";
+            cin>>id>>name>>price;
+            CBook y(id, name, price);
+            a = set.search(x);
+            b = set.search(y);
+            if(a == -1 || b == -1)
+            {
+                cout<<"The Element You entered is not present\n";
+                cout<<"________________________________________"<<endl;
+                break;
+            }
+            set.unionBySize(a, b);
+            set.display();
+            break;
+        }
+        case 2:
+        {
+            int a;
+            set.display();
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the details of the element to do find()\n";
+            cout<<"Enter id, name, price: ";
+            cin>>id>>name>>price;
+            a = set.search(CBook(id, name, price));
+            if(a == -1)
+            {
+                cout<<"The Element You entered is not present\n";
+                cout<<"________________________________________"<<endl;
+                break;
+            }
+            int idx = set.find(a);
+            cout<<"The find of"<<id<<","<<name<<","<<price<<"is"<<idx<<endl;
+            cout<<"___________________________________"<<endl;
+
+            break;
+        }
+        case 3:
+        {
+            set.display();
+            break;
+        }
+
+        }
+    } while (ch > 0 && ch < 4);
+
+}

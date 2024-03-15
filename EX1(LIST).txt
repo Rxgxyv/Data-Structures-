@@ -1,0 +1,459 @@
+[21bcs176@mepcolinux list]$cat book.h
+#include<iostream>
+using namespace std;
+
+class CBooklist
+{
+        float *price;
+        int N;
+        int capacity;
+
+public:
+
+        CBooklist(float* ,int , int);
+        void displayBook();
+        int insertBookAtLast(float);
+        int insertBookAtFirst(float);
+        int insertBookAfterElmt(float, float);
+        int insertBookAtPosition(int, float);
+        int search(float);
+        float deleteBookAtLast();
+        float deleteBookAtFirst();
+        float deleteBookElement(float ele);
+        float deleteBookBeforeElement(float sele);
+        float accessBook(int);
+        void sort();
+        int isFull();
+        int isEmpty();
+};
+[21bcs176@mepcolinux list]$cat bookimp.cpp
+/*
+ *Error Codes
+ *-1-->Full
+ *-2-->Empty
+ *-3-->Not present
+ *-4-->No data available
+ *-5-->Invalid input
+*/
+
+
+#include "book.h"
+CBooklist::CBooklist(float *p, int n, int c)
+{
+        price=new float[c];
+        N=n;
+        capacity=c;
+        for(int i=0; i<N; i++)
+        {
+                price[i]=p[i];
+        }
+}
+void CBooklist::displayBook()
+{
+        for(int i=0; i<N; i++)
+        {
+                cout<<price[i]<<endl;
+        }
+}
+void CBooklist::sort()
+{
+        if(!isEmpty())
+        {
+                for(int i=0; i<N-1; i++)
+                {
+                        for(int j=i+1; j<N; j++)
+                        {
+                                if(price[i]>price[j])
+                                {
+                                        float t=price[i];
+                                        price[i]=price[j];
+                                        price[j]=t;
+                                }
+                        }
+                }
+        }
+
+}
+int CBooklist::search(float elmt )
+{
+        if(!isEmpty())
+        {
+                for(int i=0; i<N; i++)
+                {
+                        if(price[i]==elmt)
+                        return i;
+                }
+                return -3;
+        }
+        else
+                return -2;
+
+}
+float CBooklist::accessBook(int key)
+{
+        if(key>=capacity || key < 0 )
+                return -5;
+        else if(key>=N)
+                return -4;
+        else
+                return price[key];
+}
+int CBooklist::isFull()
+{
+        if(N>=capacity)
+                return -1;
+        else
+                return 0;
+}
+int CBooklist::insertBookAtLast(float b)
+{
+        if(isFull()== -1)
+                return -1;
+        price[N++]=b;
+        return N-1;
+} 
+int CBooklist::insertBookAtFirst(float elmt)
+{
+        if(isFull())
+                return -1;
+        for(int i=N-1; i >=0; i--)
+        {
+                price[i+1]=price[i];
+        }
+        price[0] = elmt;
+        N++;
+        return 0;
+}
+int CBooklist::insertBookAfterElmt(float selmt, float ielmt)
+{
+        int pos;
+        if(!isFull())
+        {
+                pos=search(selmt);
+                if(pos >= 0)
+                {
+                        for(int i=N-1; i>pos; i--)
+                        {
+                                price[i+1]=price[i];
+                        }
+                        price[pos+1]=ielmt;
+                        N++;
+                        return pos+1;
+                }
+                else
+                        return -3;
+        }
+        else
+                return -1;
+}
+int CBooklist::insertBookAtPosition(int pos, float ielmt)
+{
+        if(isFull())
+                return -1;
+        if(pos<0||pos>N)
+                return -5;
+        for(int i=N-1;i>=pos;i--)
+        {
+                price[i+1]=price[i];
+        }
+        price[pos]=ielmt;
+        N++;
+        return pos;
+}
+
+int CBooklist::isEmpty()
+{
+        if(N==0)
+                return -2;
+        else
+                return 0;
+}
+float CBooklist::deleteBookAtLast()
+{
+        if(isEmpty())
+                return -2;
+        float ele = price[--N];
+        price[N] = -1;
+        return ele;
+}
+
+float CBooklist::deleteBookAtFirst()
+{
+        if(isEmpty())
+                return -2;
+        float ele= price[0];
+        if(N == 1)
+        {
+                price[0] = -1;
+                --N;
+                return ele;
+        }
+        else
+        {
+                for(int i = 0; i < N-1; i++)
+                {
+                        price[i] = price[i+1];
+                }
+                price[--N] = -1;
+                return ele;
+        }
+}
+float CBooklist::deleteBookElement(float ele)
+{
+        if(isEmpty())
+                return -2;
+        int pos=search(ele);
+        if(pos<0)
+        {
+                return -3;
+        }
+         ele=price[pos];
+        for(int i=pos;i<N-1;i++)
+        {
+                price[i]=price[i+1];
+        }
+        price[--N]=-1;
+        return ele;
+}
+float CBooklist::deleteBookBeforeElement(float ele)
+{
+        if(isEmpty())
+                return -2;
+        int pos=search(ele);
+        if(pos<=0)
+                return -3;
+        ele=price[pos-1];
+        for (int i=pos-1;i<N-1;i++)
+        {
+                price[i]=price[i+1];
+        }
+        price[--N]=-1;
+        return ele;
+}
+[21bcs176@mepcolinux list]$cat bookapp.cpp
+#include "book.h"
+
+int main()
+{
+        int n=0,c;
+        float *f;
+        cout<<"Enter the capacity : ";
+        cin>>c;
+        CBooklist booklist(f,n,c);
+        int ch,ch1,ch2;
+        do
+        {       cout<<"********************************************************************************"<<endl;
+                cout<<"                              BOOK MANAGEMNET SYSTEM                            "<<endl;
+                cout<<"********************************************************************************"<<endl;
+                cout<<"                              -->PRESS 1 FOR DISPLAY"<<endl;
+                cout<<"                              -->PRESS 2 FOR INSERT"<<endl;
+                cout<<"                              -->PRESS 3 FOR DELETE"<<endl;
+                cout<<"                              -->PRESS 4 FOR SEARCH"<<endl;
+                cout<<"                              -->PRESS 5 FOR ACCESS"<<endl;
+                cout<<"                              -->PRESS 6 FOR SORT"<<endl;
+                cout<<"                              -->PRESS 7 FOR EXIT"<<endl;
+                cout<<"                              -->ENTER YOUR CHOICE:"<<endl;
+                cout<<"________________________________________________________________________________"<<endl;
+                cin>>ch;
+                switch(ch)
+                {
+                        case 1:
+                        {
+                                booklist.displayBook();
+                                break;
+                        }
+
+                        case 2:
+                        {
+                                do
+                                {
+
+                                        cout<<"_____________________________________"<<endl;
+                                        cout<<"PRESS 1 TO INSERT AT FIRST"<<endl;
+                                        cout<<"PRESS 2 TO INSERT AT LAST"<<endl;
+                                        cout<<"PRESS 3 TO INSERT AFTER AN ELEMENT "<<endl;
+                                        cout<<"PRESS 4 TO INSERT AT A POSITION"<<endl;
+                                        cout<<"PRESS 5 TO EXIT FROM INSERT FUNCTION"<<endl;
+                                        cout<<"_____________________________________"<<endl;
+                                        cin>>ch1;
+                                        switch(ch1)
+                                        {
+                                                case 1:
+                                                {
+
+                                                        float ele;
+                                                        cout<<"ENTER THE ELEMENT WHICH NEED TO BE INSERTED"<<endl;
+                                                        cin>>ele;
+                                                        int idx=booklist.insertBookAtFirst(ele);
+                                                        if(idx>=0)
+                                                                cout<<"ELEMENT SUCCESSFULLY INSERTED AT FIRST INDEX :)"<<endl;
+                                                        else
+                                                                cout<<"ELEMENT CANNOT BE INSERTED.LIST IS FULL :("<<endl;
+                                                        break;
+                                                }
+                                                case 2:
+                                                {
+
+                                                        float ele;
+                                                        cout<<"ENTER THE ELEMENT WHICH NEED TO BE INSERTED"<<endl;
+                                                        cin>>ele;
+                                                        int idx=booklist.insertBookAtLast(ele);
+                                                        if(idx>=0)
+                                                                cout<<"ELEMENT SUCCESSFULLY INSERTED :)"<<idx<<endl;
+                                                        else
+                                                                cout<<"ELEMENT CANNOT BE INSERTED.THE LIST IS FULL :( "<<endl;
+                                                        break;
+                                                }
+                                                case 3:
+                                                {
+                                                                float ielmt, selmt;
+                                                                cout<<"ENTER THE ELEMENT TO BE INSERTED AFTER THE ELEMENT::";
+                                                                cin >> selmt;
+                                                                cout<<"ENTER THE ELEMENT TO BE INSERTED: ";
+                                                                cin >> ielmt;
+                                                                int idx = booklist.insertBookAfterElmt(selmt, ielmt);
+                                                                if(idx >= 0)
+                                                                        cout<<"ELEMENT SUCCESSFULLY INSERTED AT INDEX"<<idx<<":)"<<endl;
+                                                                else
+                                                                        cout<<"THE ELEMENT YOU ENETERED IS NOT FOUND IN THE LIST:("<<endl;
+                                                                 break;
+                                                }
+                                                case 4:
+                                                {
+                                                                float ielmt;
+                                                                int pos;
+                                                                cout<<"ENTER THE POSITION YOU WANT TO INSERT:"<<endl;
+                                                                cin>>pos;
+                                                                cout<<"ENTER THE ELEMENT YOU WANT TO INSERT"<<endl;
+                                                                cin>>ielmt;
+                                                                int index=booklist.insertBookAtPosition(pos, ielmt);
+                                                                if(index>=0)
+                                                                        cout<<"ELEMENT SUCCESSFULLY INSERTED AT "<<index<<":)"<<endl;
+                                                                else if(index == -5)
+                                                                        cout<<"YOU HAVE ENTERED AN INVALID POSITON"<<endl;
+                                                                else
+                                                                        cout<<"ELEMENT CANNOT BE INSERTED.THE LIST IS FULL :("<<endl;
+                                                                break;
+                                                }
+
+                                        }
+                                }while(ch1 < 5);
+                                break;
+                        }
+                        case 3:
+                        {
+                                do
+                                {
+
+
+
+                                        cout<<"____________________________________"<<endl;
+                                        cout<<"PRESS 1 TO DELETE AT LAST"<<endl;
+                                        cout<<"PRESS 2 TO DELETE AT FIRST"<<endl;
+                                        cout<<"PRESS 3 TO DELETE AN ELEMENT"<<endl;
+                                        cout<<"PRESS 4 TO DELETE BEFORE AN ELEMENT"<<endl;
+                                        cout<<"PRESS 5 TO EXIT FROM DELETE FUNCTION"<<endl;
+                                        cout<<"____________________________________"<<endl;
+                                        cin>>ch2;
+                                        switch(ch2)
+                                        {
+                                                case 1:
+                                                {
+                                                        float ele = booklist.deleteBookAtLast();
+                                                        if(ele == -2)
+                                                                cout<<"NO ELEMENT DELETED.THE LIST IS EMPTY"<<endl;
+                                                        else
+                                                                cout<<"THE DELETED ELEMENT IS:"<<ele<<endl;
+                                                        break;
+
+
+                                                }
+                                                case 2:
+                                                {
+                                                        float ele = booklist.deleteBookAtFirst();
+                                                        if(ele == -2)
+                                                                cout<<"NO ELEMENT DELETED.THE LIST IS EMPTY"<<endl;
+                                                        else
+                                                                cout<<"THE DELETED ELEMENT IS: "<<ele<<endl;
+                                                        break;
+                                                }
+                                                case 3:
+                                                {
+                                                        float elmnt;
+                                                        cout<<"ENTER THE ELEMENT YOU WANT TO DELETE"<<endl;
+                                                        cin>>elmnt;
+
+                                                        float ele=booklist.deleteBookElement(elmnt);
+                                                        if(ele==-2)
+                                                                cout<<"ELEMENT NOT DELETED.THE LIST IS EMPTY"<<endl;
+                                                        else if(ele==-3)
+                                                                cout<<"ELEMENT YOU ENTERED IS NOT FOUND"<<endl;
+                                                        else
+                                                                cout<<"ELEMENT DELETED SUCCESSULLY :)"<<endl;
+                                                        break;
+                                                }
+                                                case 4:
+                                                {
+                                                        float selmt;
+                                                        cout<<"ENTER THE ELEMENT TO BE DELETED BEFORE:"<<endl;
+                                                        cin>>selmt;
+                                                        int idx=booklist.deleteBookBeforeElement(selmt);
+                                                        if(idx==-2)
+                                                                cout<<"ELEMENT NOT DELETED.THE LIST IS EMPTY"<<endl;
+                                                        else if(idx==-3)
+                                                                cout<<"ELEMENT YOU ENTERED IS NOT FOUND"<<endl;
+                                                        else
+                                                                cout<<"ELEMENT DELETED SUCCESSFULLY :)"<<endl;
+                                                }
+                                        }
+                                }while(ch2<5);
+                                break;
+                        }
+                        case 4:
+                        {
+                                float ele;
+                                cout<<"ENTER THE ELEMENT YOU WANT TO SEARCH: ";
+                                cin >> ele;
+                                int idx = booklist.search(ele);
+                                if(idx == -3)
+                                        cout<<"ELEMENT NOT FOUND"<<endl;
+                                else if(idx == -2)
+                                        cout<<"LIST IS EMPTY"<<endl;
+                                else
+                                        cout<<"ELEMENT FOUND AT INDEX:"<<idx<<endl;
+                                break;
+                        }
+                        case 5:
+                        {
+                                int idx;
+                                cout<<"ENTER THE INDEX WHERE YOU WANT TO DO ACCESS:";
+                                cin>>idx;
+                                float ele = booklist.accessBook(idx);
+                                if(ele == -5)
+                                        cout<<"INVALID INPUT"<<endl;
+                                else if(ele == -4)
+                                        cout<<"DATA NOT AVAILABLE"<<endl;
+                                else
+                                        cout<<"ELEMENT AT INDEX"<<idx<<"IS"<<ele<<endl;
+                                break;
+                        }
+                        case 6:
+                        {
+                                booklist.sort();
+                                break;
+                        }
+                        case 7:
+                        {
+                                cout<<"THANK YOU FOR USING BOOK MANAGEMENT SYSTEM :)"<<endl;
+                                break;
+                        }
+                        default:
+                        {
+                                cout<<"INVALID INPUT"<<endl;
+                                break;
+                        }
+                }
+        }while(ch < 7);
+        return 0;
+}
+[21bcs176@mepcolinux list]$
