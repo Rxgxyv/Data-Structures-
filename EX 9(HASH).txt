@@ -1,0 +1,430 @@
+#include<iostream>
+using namespace std;
+
+class CBook
+{
+    int bookId;
+    string bookName;
+    double price;
+public:
+    CBook();
+    CBook(int, string, double);
+    bool operator ==(CBook);
+    void displayBook();
+    int getId();
+    string getName();
+    double getPrice();
+};
+
+class COpenHash
+{
+    CBook* arr;
+    int size;
+    int tSize;
+
+    int smallPrime(int);
+public:
+    COpenHash(int, int);
+    int insertL(CBook);
+    int insertQ(CBook);
+    int deleteEleL(CBook);
+    int deleteEleQ(CBook);
+    void display();
+    int hash(int);
+    int searchL(CBook);
+    int searchQ(CBook);
+    int isFull();
+    int isEmpty();
+};
+[21bcs176@mepcolinux ex9]$cat bookimp.cpp
+#include"book.h"
+CBook::CBook()
+{
+        bookId = 0;
+        bookName = "";
+        price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+        bookId = id;
+        bookName = n;
+        price = p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+void CBook::displayBook()
+{
+        cout<<"ID: "<<bookId<<" , ";
+        cout<<"Name: "<<bookName<<" , ";
+        cout<<"Price: "<<price;
+}
+int CBook::getId()
+{
+        return bookId;
+}
+
+COpenHash::COpenHash(int s, int t)
+{
+    size = s;
+    tSize = t;
+    arr = new CBook[tSize];
+    for(int i = 0; i < tSize; i++)
+        arr[i] = CBook(-1, "", 0);
+}
+
+int COpenHash::hash(int x)
+{
+    return x % tSize;
+}
+
+int COpenHash::insertL(CBook ele)
+{
+    if(isFull())return -1;
+
+    int hashVal = hash(ele.getId());
+    if(arr[hashVal].getId() == -1)
+    {
+        arr[hashVal] = ele;
+        size++;
+        return hashVal;
+    }
+    int t, i = 1;
+    do
+    {
+        int t = (hashVal + i) % tSize;
+        if(arr[t].getId() == -1)
+        {
+            arr[t] = ele;
+            size++;
+            return t;
+        }
+        i++;
+    }while(t != hashVal);
+    return -3;
+}
+
+int COpenHash::insertQ(CBook ele)
+{
+    if(isFull())return -1;
+
+    int hashVal = hash(ele.getId());
+    if(arr[hashVal].getId() == -1)
+    {
+        arr[hashVal] = ele;
+        size++;
+        return hashVal;
+    }
+    int t;
+    int i = 1;
+    do
+    {
+        t = (hashVal + i*i) % tSize;
+        if(arr[t].getId() == -1)
+        {
+            arr[t] = ele;
+            size++;
+            return t;
+        }
+        i++;
+    }while(t != hashVal);
+    return -3;
+}
+
+int COpenHash::deleteEleL(CBook ele)
+{
+    if(isEmpty())return -2;
+    int h = hash(ele.getId());
+    do
+    {
+        if(arr[h] == ele)
+        {
+            arr[h] = CBook(-1,"",0);
+            return 1;
+        }
+        h = (h + 1)%tSize;
+
+    }while(h != hash(ele.getId()));
+    return -3;
+}
+
+int COpenHash::deleteEleQ(CBook ele)
+{
+    if(isEmpty())return -2;
+    int h = hash(ele.getId());
+    int i = 0, t = h;
+    do
+    {
+        if(arr[t] == ele)
+        {
+            arr[t] = CBook(-1,"",0);
+            return 1;
+        }
+        i++;
+        t = (h + i*i)%tSize;
+    }while(t != h);
+    return -3;
+}
+
+void COpenHash::display()
+{
+    for(int i = 0; i < tSize; i++)
+    {
+        if(arr[i].getId() == -1)
+        {
+            cout<<i<<" | -1"<<endl;
+        }
+        else
+        {
+            cout<<i<<" | ";
+            arr[i].displayBook();
+            cout<<endl;
+        }
+    }
+}
+
+int COpenHash::isEmpty()
+{
+    if(size == 0)return -2;
+    return 0;
+}
+
+int COpenHash::isFull()
+{
+    if(size == tSize)return -1;
+    return 0;
+}
+
+int COpenHash::searchL(CBook ele)
+{
+    if(isEmpty())return -2;
+
+    int hv = hash(ele.getId());
+    int i = 0, t = hv;
+    do
+    {
+        if(arr[t] == ele)return t;
+        i++;
+        t = (hv + i)%tSize;
+    }while(t != hv);
+    return -3;
+}
+
+int COpenHash::searchQ(CBook ele)
+{
+    if(isEmpty())return -2;
+
+    int hv = hash(ele.getId());
+    int i = 0, t = hv;
+    do
+    {
+        if(arr[t] == ele)return t;
+        i++;
+        t = (hv + i*i)%tSize;
+    }while(t != hv);
+    return -3;
+}
+[21bcs176@mepcolinux ex9]$cat bookapp.cpp
+#include "book.h"
+void linear(COpenHash);
+void quadratic(COpenHash);
+
+int main()
+{
+    int cap;
+    cout<<"Enter the table size (a prime number): ";
+    cin >> cap;
+    COpenHash lh(0, cap);
+    COpenHash qh(0, cap);
+    int ch;
+    do
+    {
+        cout<<"\n\nBook Management System using Open Hashing"<<endl;
+        cout<<"_____________________________________________"<<endl;
+        cout<<"\n1. Linear Probing";
+        cout<<"\n2. Quadratic Probing";
+        cout<<"\n3. Exit"<<endl;
+        cout<<"\nChoose the method of hashing: ";
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            linear(lh);
+            break;
+        }
+        case 2:
+        {
+            quadratic(qh);
+            break;
+        }
+
+        }
+    } while (ch > 0 && ch < 3);
+    return 0;
+}
+
+void linear(COpenHash lh)
+{
+    int ch;
+    do
+    {   cout<<"***************************"<<endl;
+        cout<<"Book Management System"<<endl;
+        cout<<"     Using Linear Probing"<<endl;
+        cout<<"***************************"<<endl;
+        cout<<"\n1)Insert"<<endl;
+        cout<<"\n2)Delete"<<endl;
+        cout<<"\n3)Display"<<endl;
+        cout<<"\n4)Search"<<endl;
+        cout<<"5)Go Back"<<endl;
+        cout<<"___________________________"<<endl;
+        cout<<"\nEnter your choice: "<<endl;
+        cout<<"___________________________"<<endl;
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price: ";
+            cin >> id >>name >>price;
+            int idx = lh.insertL(CBook(id, name, price));
+            if(idx == -1)
+                cout<<"The hashtable is full\n";
+            else if(idx == -3)
+                cout<<"Can't insert element\n";
+            else
+                cout<<"Inserted at index "<<idx;
+            lh.display();
+            break;
+        }
+        case 2:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name, price : ";
+            cin >> id >> name >> price;
+            int idx = lh.deleteEleL(CBook(id, name, price));
+            if(idx == -2)
+                cout<<"The hashtable is empty\n";
+            else if(idx == -3)
+                cout<<"The element is not present\n";
+            else
+                cout<<"Deleted successfully\n";
+            lh.display();
+            break;
+        }
+        case 3:
+        {
+            lh.display();
+            break;
+        }
+        case 4:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name, price : ";
+            cin >> id >> name >> price;
+            int idx = lh.searchL(CBook(id, name, price));
+            if(idx == -2)
+                cout<<"The hashtable is empty\n";
+            else if(idx == -3)
+                cout<<"The element is not present\n";
+            else
+                cout<<"Found at index " << idx <<endl;
+            break;
+        }
+        default:
+            break;
+        }
+    } while (ch > 0 && ch < 5);
+
+}
+
+void quadratic(COpenHash qh)
+{
+    int ch;
+    do
+    {
+        cout<<"****************************************"<<endl;
+        cout<<"Book Management System "<<endl;
+        cout<<"     Using Quadratic Probing"<<endl;
+        cout<<"****************************************"<<endl;
+        cout<<"\n1)Insert"<<endl;
+        cout<<"\n2)Delete"<<endl;
+        cout<<"\n3)Display"<<endl;
+        cout<<"\n4)Search"<<endl;
+        cout<<"\n5)Go Back"<<endl;
+        cout<<"________________________"<<endl;
+        cout<<"\nEnter your choice: "<<endl;
+        cout<<"________________________"<<endl;
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+
+            cout<<"Enter the ID, Name and Price: ";
+            cin >> id >>name >>price;
+            int idx = qh.insertQ(CBook(id, name, price));
+            if(idx == -1)
+                cout<<"Hashtable is full\n";
+            else if(idx == -3)
+                cout<<"Can't insert element\n";
+            else
+                cout<<"\nInserted at index "<<idx;
+            qh.display();
+            break;
+        }
+        case 2:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the ID, Name and Price:";
+            cin >> id >> name >> price;
+            int idx = qh.deleteEleQ(CBook(id, name, price));
+            if(idx == -2)
+                cout<<"Hashtable is empty\n";
+            else if(idx == -3)
+                cout<<"Element is not present\n";
+            else
+                cout<<"Deleted successfully\n";
+            qh.display();
+            break;
+        }
+        case 3:
+        {
+            qh.display();
+            break;
+        }
+        case 4:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the ID, Name and Price: ";
+            cin >> id >> name >> price;
+            int idx = qh.searchQ(CBook(id, name, price));
+            if(idx == -2)
+                cout<<"Hashtable is empty\n";
+            else if(idx == -3)
+                cout<<"The element is not present\n";
+            else
+                cout<<"Found at index " << idx <<endl;
+            break;
+        }
+        default:
+            break;
+        }
+    } while (ch > 0 && ch < 5);
+}

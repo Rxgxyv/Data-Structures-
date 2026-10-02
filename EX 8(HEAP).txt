@@ -1,0 +1,287 @@
+#include<iostream>
+using namespace std;
+
+class CBook
+{
+    int bookId;
+    string bookName;
+    double price;
+public:
+    CBook();
+    CBook(int, string, double);
+    bool operator ==(CBook);
+    void displayBook();
+    int getId();
+    string getName();
+    double getPrice();
+};
+
+class CHeap
+{
+    CBook* arr;
+    int size, capacity;
+public:
+    CHeap(CBook*, int, int);
+    int enqueue(CBook);
+    void buildHeap(CBook*, int);
+    CBook dequeue();
+    void percolateDown(int);
+    void display();
+    int isEmpty();
+    int search(CBook);
+};
+[21bcs176@mepcolinux ex8]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+        bookId = 0;
+        bookName = "";
+        price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+        bookId = id;
+        bookName = n;
+        price = p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+void CBook::displayBook()
+{
+        cout<<"___________________"<<endl;
+        cout<<"ID\t"<<"NAME\t"<<"PRICE\t"<<endl;
+        cout<<bookId<<"\t"<<bookName<<"\t"<<price<<endl;
+        cout<<"___________________"<<endl;
+}
+int CBook::getId()
+{
+        return bookId;
+}
+
+string CBook::getName()
+{
+        return bookName;
+}
+
+double CBook::getPrice()
+{
+        return price;
+}
+
+CHeap::CHeap(CBook* a, int s, int c)
+{
+    capacity = c;
+    size = s;
+    arr = new CBook[capacity+1];
+    for(int i = 1; i <= size; i++)
+    {
+        arr[i] = a[i];
+    }
+}
+
+int CHeap::enqueue(CBook ele)
+{
+    if(size + 1 > capacity)
+    {
+        capacity *= 2;
+        arr = new CBook[capacity];
+    }
+    int hole = ++size;
+    for(; hole > 1 && ele.getId() < arr[hole/2].getId(); hole/=2)
+    {
+        arr[hole] = arr[hole/2];
+    }
+
+    arr[hole] = ele;
+    return hole;
+}
+
+CBook CHeap::dequeue()
+{
+    if(isEmpty())
+        return CBook(-2, "",0);
+
+    CBook ele = arr[1];
+    arr[1] = arr[size--];
+    percolateDown(1);
+    return ele;
+}
+
+void CHeap::percolateDown(int hole)
+{
+    int child;
+    CBook temp = arr[hole];
+    for(; hole*2 <= size; hole = child)
+    {
+        child = 2*hole;
+        if(child != size && arr[child].getId() > arr[child+1].getId())
+            child++;
+
+        if(temp.getId() > arr[child].getId())
+            arr[hole] = arr[child];
+        else break;
+    }
+    arr[hole] = temp;
+}
+
+void CHeap::buildHeap(CBook* data, int s)
+{
+    for(int i = 1; i <= s; i++)
+    {
+        arr[i] = data[i];
+    }
+    size = s;
+
+    for(int i = s/2; i > 0; i--)
+        percolateDown(i);
+
+}
+
+void CHeap::display()
+{
+    if(isEmpty())
+    {
+        cout<<"The heap is empty\n";
+        return;
+    }
+
+    for(int i = 1; i <= size; i++)
+    {
+        arr[i].displayBook();
+    }
+}
+
+int CHeap::isEmpty()
+{
+    if(size == 0)return -2;
+    return 0;
+}
+
+int CHeap::search(CBook ele)
+{
+    if(isEmpty())
+        return -2;
+
+    for(int i = 1; i <= size; i++)
+    {
+        if(arr[i] == ele)
+            return i;
+    }
+
+    return -3;
+}
+[21bcs176@mepcolinux ex8]$cat bookapp.cpp
+#include "book.h"
+
+int main()
+{
+    int ch, cap;
+    cout<<"___________________________"<<endl;
+    cout<<"Enter the maximum capacity: "<<endl;
+    cout<<"___________________________"<<endl;
+    cin >> cap;
+    CBook a[] = {};
+    CHeap heap(a, 0, cap);
+
+    do
+    {
+        cout<<"*****************************"<<endl;
+        cout<<"   BOOK MANAGEMENT SYSTEM    "<<endl;
+        cout<<"*****************************"<<endl;
+        cout<<"1.Enqueue\n";
+        cout<<"2.Dequeue\n";
+        cout<<"3.Search\n";
+        cout<<"4.Build Heap\n";
+        cout<<"5.Display\n";
+        cout<<"6.Exit\n";
+        cout<<"_____________________________"<<endl;
+        cout<<"Enter your choice: ";
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            CBook ele(id, name, price);
+            if(heap.enqueue(ele))
+                cout<<"Enqueue successfull\n";
+            else
+                cout<<"Enqueue failed\n";
+            break;
+        }
+        case 2:
+        {
+            CBook ele = heap.dequeue();
+            if(ele.getId() == -2){
+                cout<<"The heap is empty\n";
+            }
+            else{
+                cout<<"The deleted element is:\n";
+                ele.displayBook();
+            }
+            break;
+        }
+        case 3:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            CBook ele(id, name, price);
+            int status = heap.search(ele);
+            if(status == -2)
+            {
+                cout<<"The heap is empty\n";
+            }
+            else if(status == -3)
+            {
+                cout<<"The element was not found\n";
+            }
+            else{
+                cout<<"Element was found at index: "<<status<<endl;
+            }
+            break;
+        }
+        case 4:
+        {
+            int size;
+            cout<<"Enter the number of elements: ";
+            cin >> size;
+            CBook* arr = new CBook[size+1];
+            for(int i = 1; i<= size; i++)
+            {
+                int id;
+                string name;
+                double price;
+                cout<<"Enter the id, name and price of the book: ";
+                cin>>id>>name>>price;
+                CBook ele(id, name, price);
+                arr[i] = ele;
+            }
+
+            heap.buildHeap(arr, size);
+            break;
+        }
+        case 5:
+        {
+            heap.display();
+            break;
+        }
+        case 6:
+        {
+            cout<<"Exited\n";
+            break;
+        }
+        }
+    } while (ch > 0 && ch < 6);
+
+}

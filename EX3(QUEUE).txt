@@ -1,0 +1,224 @@
+#include<iostream>
+using namespace std;
+class CBook
+{
+        int bookid;
+        string bookname;
+        double price;
+public:
+        CBook();
+        CBook(int,string,double);
+        bool operator ==(CBook);
+        int getID();
+        void display();
+};
+
+class CBookQueue
+{
+        CBook *book;
+        int front,rear,capacity;
+public:
+        CBookQueue(int,int,int,CBook*);
+        int enqueue(CBook);
+        void displayBook();
+        void makeempty();
+        CBook dequeue();
+        int isEmpty();
+        int isFull();
+        int search(CBook);
+};
+[21bcs176@mepcolinux ex3]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+        bookid=0;
+        bookname="";
+        price=0;
+}
+CBook::CBook(int id,string n,double p)
+{
+        bookid=id;
+        bookname=n;
+        price=p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookid==b.bookid && bookname==b.bookname && price==b.price);
+}
+void CBook::display()
+{
+        cout<<"__________________"<<endl;
+        cout<<"ID of the Book:"<<bookid<<endl;
+        cout<<"Name of the Book:"<<bookname<<endl;
+        cout<<"Price of the Book:"<<price<<endl;
+        cout<<"__________________"<<endl;
+}
+int CBook::getID()
+{
+        return bookid;
+}
+CBookQueue::CBookQueue(int f,int r,int c,CBook *b)
+{
+        front=f;
+        rear=r;
+        capacity=c;
+        book=new CBook[capacity];
+        for(int i=0;i<=rear;i++)
+                book[i]=b[i];
+}
+int CBookQueue::isFull()
+{
+        if(rear==capacity-1)
+                return -1;
+        return 0;
+}
+int CBookQueue::isEmpty()
+{
+        if(front == rear)
+                return -2;
+        return 0;
+}
+void CBookQueue::makeempty()
+{
+        while(!isEmpty())
+                dequeue();
+}
+void CBookQueue::displayBook()
+{
+        if(isEmpty())
+        {
+                cout<<"Queue is Empty"<<endl;
+        }
+        else
+        {
+          cout<<"Book list are"<<endl;
+          for(int i=front+1;i<=rear;i++)
+          {
+                book[i].display();
+                cout<<endl;
+          }
+        }
+}
+int CBookQueue::enqueue(CBook ele)
+{
+        if(isFull()) return -1;
+        book[++rear]=ele;
+        return rear;
+}
+CBook CBookQueue::dequeue()
+{
+        if(isEmpty()) return CBook(-2,"",0);
+        CBook ele=book[++front];
+        book[front]=CBook();
+        return ele;
+}
+int CBookQueue::search(CBook ele)
+{
+        if(isEmpty())
+        {
+                return -2;
+        }
+        for(int i=front+1;i<=rear;i++)
+        {
+                if(book[i]==ele) return i;
+        }
+        return -3;
+}
+
+
+[21bcs176@mepcolinux ex3]$cat bookapp.cpp
+#include "book.h"
+
+int main()
+{
+  int ch,capacity;
+  cout<<"Enter capacity:"<<endl;
+  cin>>capacity;
+  CBook b[]={};
+  CBookQueue q(-1,-1,capacity,b);
+  do
+  {
+    cout<<"***********************"<<endl;
+    cout<<"BOOK MANAGEMENT SYSTEM" <<endl;
+    cout<<"***********************"<<endl;
+    cout<<"1. Enqueue\n";
+    cout<<"2. Dequeue\n";
+    cout<<"3. Search\n";
+    cout<<"4. Make Queue Empty\n";
+    cout<<"5. Display\n";
+    cout<<"6. Exit\n";
+    cout<<"Enter the choice: ";
+    cin >> ch;
+    switch(ch)
+    {
+     case 1:
+     {
+       int id;
+       string name;
+       double price;
+       cout<<"Enter the id, name, price: ";
+       cin >> id >> name >> price;
+       int idx = q.enqueue(CBook(id, name, price));
+       if(idx == -1)
+              cout<<"The queue is full\n";
+       else
+              cout<<"The element inserted at index: "<<idx<<endl;
+              break;
+     }
+     case 2:
+     {
+       CBook ele = q.dequeue();
+       if(ele.getID() == -2)
+              cout<<"The queue is empty\n";
+       else
+       {
+          cout<<"The deleted element is "<<endl;
+          ele.display();
+       }
+          break;
+     }
+     case 3:
+     {
+
+        int id;
+        string name;
+        double price;
+        cout<<"Enter the id, name, price: ";
+        cin >> id >> name >> price;
+        int idx = q.search(CBook(id, name, price));
+        if(idx == -2)
+              cout<<"The queue is empty\n";
+        else if(idx == -3)
+              cout<<"The element is not found\n";
+        else
+              cout<<"The element found at index: "<<idx<<endl;
+              break;
+      }
+      case 4:
+      {
+          q.makeempty();
+          cout<<"Queue Emptied"<<endl;
+          break;
+      }
+      case 5:
+      {
+          q.displayBook();
+          break;
+      }
+      case 6:
+      {
+          cout<<"Exit\n";
+          break;
+      }
+     }
+   }while(ch > 0 && ch < 6);
+    return 0;
+}
+[21bcs176@mepcolinux ex3]$cat makefile
+book: bookimp.o bookapp.o
+        g++ bookimp.o bookapp.o -o book
+bookimp.o: bookimp.cpp
+        g++ -c bookimp.cpp
+bookapp.o: bookapp.cpp
+        g++ -c bookapp.cpp

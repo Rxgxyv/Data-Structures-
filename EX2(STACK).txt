@@ -1,0 +1,287 @@
+ #include<iostream>
+using namespace std;
+class CBookStack;
+
+class CBook
+{       friend class CBookStack;
+        int bookId;
+        string bookname;
+        double price;
+public:
+        CBook();
+        CBook(int, string, double);
+        int getid();
+        bool operator ==(CBook);
+        void displayBook();
+};
+
+class CBookStack
+{
+        friend class CBook;
+        int top,capacity;
+        CBook *books;
+public:
+        CBookStack(CBook*, int,int);
+        int push(CBook);
+        CBook pop();
+        CBook peek();
+        CBook access(int);
+        void display();
+        int MakeStackEmpty();
+        int search(CBook);
+        int isFull();
+        int isEmpty();
+        CBook accessBook(int);
+};
+[21bcs176@mepcolinux ex2]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+        bookId = 0;
+        bookname = "";
+        price = 0;
+}
+
+CBook::CBook(int i, string n, double p)
+{
+        bookId = i;
+        bookname = n;
+        price = p;
+}
+
+bool CBook::operator ==(CBook b)
+{
+        if(bookId == b.bookId && bookname == b.bookname && price == b.price)
+        {
+                return true;
+        }
+        return false;
+}
+
+void CBook::displayBook()
+{
+        cout<<"ID OF THE BOOK: "<<bookId<<endl;
+        cout<<"NAME OF THE BOOK: "<<bookname<<endl;
+        cout<<"PRICE OF THE BOOK: "<<price<<endl;
+}
+
+CBookStack::CBookStack(CBook* b, int n, int c)
+{
+        top = n;
+        capacity = c;
+        books = new CBook[capacity];
+        for(int i = 0; i <= n; i++)
+                books[i] = b[i];
+}
+
+void CBookStack::display()
+{
+        cout<<endl;
+        for(int i = 0; i <= top; i++)
+        {
+                books[i].displayBook();
+                cout<<endl;
+        }
+
+}
+CBook CBookStack :: accessBook(int index)
+{
+        return books[index];
+}
+
+int CBook::getid()
+{
+
+        return bookId;
+}
+
+int CBookStack::push(CBook ele)
+{
+        if(isFull())
+        {
+                return -1;
+        }
+        books[++top] = ele;
+        return top;
+}
+
+CBook CBookStack::pop()
+{
+        if(isEmpty())
+        {
+                return CBook(-2, "", 0);
+        }
+        CBook ele = books[top];
+        books[top--] = CBook(-1, "", 0);
+        return ele;
+}
+
+CBook CBookStack::peek()
+{
+        if(isEmpty())
+        {
+                return CBook(-2, "", 0);
+        }
+        return books[top];
+}
+int CBookStack::isFull()
+{
+        if(top == capacity - 1)
+        {
+                return -1;
+        }
+        else
+                return 0;
+}
+
+int CBookStack::isEmpty()
+{
+        if(top == -1)
+        {
+                return -2;
+        }
+        else
+        {
+                return 0;
+        }
+}
+CBook CBookStack::access(int x)
+{
+        if(x>=capacity || x < 0)
+        {
+                return CBook(-5, "", 0);
+        }
+        else if(x>top)
+        {
+                return CBook(-4, "", 0);
+        }
+        else
+        {
+                return books[x];
+        }
+}
+int CBookStack::MakeStackEmpty()
+{
+        while(!isEmpty())
+        {
+                pop();
+        }
+        return -2;
+}
+[21bcs176@mepcolinux ex2]$cat bookapp.cpp
+#include "book.h"
+int main()
+{
+        int c;
+        int capacity;
+        cout<<"__________________________________"<<endl;
+        cout<<"WELCOME TO BOOK MANAGEMENT SYSTEM"<<endl;
+        cout<<"__________________________________"<<endl;
+        cout<<"ENTER THE MAXIMM CAPACITY:"<<endl;
+        cin>>capacity;
+        CBook b[]={};
+        CBookStack C(b,-1,capacity);
+        do
+        {
+                cout<<"press 1 for display"<<endl;
+                cout<<"press 2 for push"<<endl;
+                cout<<"press 3 for pop"<<endl;
+                cout<<"press 4 for peek"<<endl;
+                cout<<"press 5 for access"<<endl;
+                cout<<"press 6 for makestackempty"<<endl;
+                cout<<"press 7 for exit"<<endl;
+                cout<<"enter your choice:"<<endl;
+                cin>>c;
+                switch(c)
+                {
+                        case 1:
+                        {
+                                C.display();
+                                break;
+                        }
+                        case 2:
+                        {
+                                int id;
+                                string Name;
+                                double price;
+                                cout<<"Enter the ID,Name,Price of the Book:"<<endl;
+                                cin>>id>>Name>>price;
+                                int idx=C.push(CBook(id,Name,price));
+                                if(idx==-1)
+                                {
+                                        cout<<"The stack is full\n";
+                                }
+                                else
+                                {
+                                        cout<<"The Element is inserted at the Index:"<<idx<<endl;
+                                }
+                                break;
+                        }
+                        case 3:
+                        {
+                                CBook ele=C.pop();
+                                if(ele.getid()==(-2))
+                                {
+                                        cout<<"Stack Is Empty"<<endl;
+                                }
+                                else
+                                {
+                                        cout<<"Popped Element Is:";
+                                        ele.displayBook();
+
+                                }
+                                break;
+                        }
+                        case 4:
+                        {
+                                CBook ele=C.peek();
+                                if(ele.getid()==-2)
+                                {
+                                        cout<<"Stack Is Empty";
+                                }
+                                else
+                                {
+                                        cout<<"Top Element is:"<<endl;
+                                        ele.displayBook();
+                                }
+                                break;
+                        }
+                        case 5:
+                        {
+                                int d;
+                                cout<<"Enter the index:"<<endl;
+                                cin>>d;
+                                CBook a=C.access(d);
+                                if(a.getid()==-5)
+                                        cout<<"The entered index is out of Bound"<<endl;
+                                else if(a.getid()==-4)
+                                        cout<<"The entered index is out of N:"<<endl;
+                                else
+                                {
+                                        cout<<"The Element is:"<<endl;
+                                        a.displayBook();
+                                }
+                                break;
+
+                        }
+                        case 6:
+                        {
+                                int d=C.MakeStackEmpty();
+                                if(d==-2)
+                                        cout<<"STACK EMPTIED"<<endl;
+                                        break;
+                        }
+                        case 7:
+                        {
+                                cout<<"THANK YOU FOR USING BOOK MANAGEMENT SYSTEM"<<endl;
+                                break;
+                        }
+                        default:
+                        {
+                                cout<<"Invalid choice"<<endl;
+                        }
+                }
+        }while(c>0 && c<=6);
+        return 0;
+}

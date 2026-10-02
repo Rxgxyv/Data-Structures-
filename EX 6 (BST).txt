@@ -1,0 +1,334 @@
+#include<iostream>
+using namespace std;
+
+class CBook
+{
+    int bookId;
+    string bookName;
+    double price;
+public:
+    CBook();
+    CBook(int, string, double);
+    bool operator ==(CBook);
+    void displayBook();
+    int getId();
+    string getName();
+    double getPrice();
+};
+
+class CNode
+{
+public:
+    CBook data;
+    CNode* left;
+    CNode* right;
+
+    CNode(CBook, CNode*, CNode*);
+};
+
+class CBST
+{
+    CNode* root;
+public:
+    CBST(CNode*);
+    void inorder(CNode*);
+    void preorder(CNode*);
+    void postorder(CNode*);
+    CNode* insert(CBook, CNode*);
+    CNode* deleteElmt(CBook, CNode*);
+    CNode* search(CBook, CNode*);
+    CNode* findMin();
+    CNode* findMax();
+    CNode* inorderSuccessor(CNode*);
+    CNode* getRoot();
+    void setRoot(CNode*);
+};
+[21bcs176@mepcolinux ex6]$cat bookimp.cpp
+#include "book.h"
+CBook::CBook()
+{
+        bookId = 0;
+        bookName = "";
+        price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+        bookId = id;
+        bookName = n;
+        price = p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+void CBook::displayBook()
+{
+        cout<<"*************************"<<endl;
+        cout<<"ID OF THE BOOK: "<<bookId<<endl;
+        cout<<"NAME OF THE BOOK: "<<bookName<<endl;
+        cout<<"PRICE OF THE BOOK: "<<price<<endl;
+        cout<<"*************************"<<endl;
+}
+int CBook::getId()
+{
+        return bookId;
+}
+
+string CBook::getName()
+{
+        return bookName;
+}
+
+double CBook::getPrice()
+{
+        return price;
+}
+
+CNode::CNode(CBook d, CNode* l=NULL, CNode* r=NULL)
+{
+    data = d;
+    left = l;
+    right = r;
+}
+
+CBST::CBST(CNode* r=NULL)
+{
+    root = r;
+}
+
+void CBST::inorder(CNode* r)
+{
+    if(!r)return;
+
+    inorder(r->left);
+    r->data.displayBook();
+    inorder(r->right);
+}
+
+void CBST::preorder(CNode* r)
+{
+    if(!r)return;
+
+    r->data.displayBook();
+    preorder(r->left);
+    preorder(r->right);
+}
+
+void CBST::postorder(CNode* r)
+{
+    if(!r)return;
+
+    postorder(r->left);
+    postorder(r->right);
+    r->data.displayBook();
+}
+
+CNode* CBST::search(CBook ele, CNode* r)
+{
+    if(!r)return NULL;
+    if(ele.getId() < r->data.getId())
+    {
+        return search(ele, r->left);
+    }
+    else if(ele.getId() > r->data.getId())
+    {
+        return search(ele, r->right);
+    }
+    else return r;
+}
+
+CNode* CBST::getRoot()
+{
+    return root;
+}
+
+void CBST::setRoot(CNode* r)
+{
+    root = r;
+}
+
+CNode* CBST::insert(CBook ele, CNode* r)
+{
+    if(r == NULL)
+    {
+        return new CNode(ele);
+    }
+    if(ele.getId() < r->data.getId())
+    {
+        r->left = insert(ele, r->left);
+    }
+    else
+    {
+        r->right = insert(ele, r->right);
+    }
+    return r;
+}
+
+CNode* CBST::inorderSuccessor(CNode* r)
+{
+    CNode* curr = r->right;
+    while(curr && curr->left)
+        curr = curr->left;
+    return curr;
+}
+
+CNode* CBST::deleteElmt(CBook ele, CNode* r)
+{
+    if(r == NULL)return r;
+    if(search(ele, root) == NULL)return NULL;
+     if(ele.getId() < r->data.getId())
+        r->left = deleteElmt(ele, r->left);
+    else if(ele.getId() > r->data.getId())
+        r->right = deleteElmt(ele, r->right);
+    else
+    {
+        if(r->left == NULL)
+        {
+            CNode* temp = r->right;
+            delete(r);
+            return temp;
+        }
+        else if(r->right == NULL)
+        {
+            CNode* temp = r->left;
+            delete r;
+            return temp;
+        }
+
+        CNode* temp = inorderSuccessor(r);
+        r->data = temp->data;
+        r->right = deleteElmt(temp->data, r->right);
+    }
+
+    return r;
+}
+
+CNode* CBST::findMin()
+{
+    CNode* curr = root;
+    while(curr && curr->left)
+    {
+        curr = curr->left;
+    }
+    return curr;
+}
+
+CNode* CBST::findMax()
+{
+    CNode* curr = root;
+    while(curr && curr->right)
+    {
+        curr = curr->right;
+    }
+    return curr;
+}
+[21bcs176@mepcolinux ex6]$cat bookapp.cpp
+#include "book.h"
+
+int main()
+{
+    CBST t(NULL);
+    int ch;
+    do
+    {
+        cout<<"__________________________"<<endl;
+        cout<<"    BINARY SEARCH TREE    "<<endl;
+        cout<<"__________________________"<<endl;
+        cout<<"1.Insert\n";
+        cout<<"2.Delete\n";
+        cout<<"3.Search\n";
+        cout<<"4.Find minimum\n";
+        cout<<"5.Find maximum\n";
+        cout<<"6.Inorder Traversal\n";
+        cout<<"7.Preorder Traversal\n";
+        cout<<"8.Postorder Traversal\n";
+        cout<<"9.Exit\n";
+        cout<<"__________________________"<<endl;
+        cout<<"Enter your choice:";
+        cin >> ch;
+        switch (ch)
+        {
+        case 1:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            t.setRoot(t.insert(CBook(id, name, price), t.getRoot()));
+            break;
+        }
+        case 2:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            CNode* ele = t.deleteElmt(CBook(id, name, price), t.getRoot());
+            if(ele == NULL)
+            {
+                cout<<"Element not deleted\n";
+            }
+            else
+            {
+                cout<<"Element deleted \n";
+            }
+            break;
+        }
+        case 3:
+        {
+            int id;
+            string name;
+            double price;
+            cout<<"Enter the id, name and price of the book: ";
+            cin>>id>>name>>price;
+            CNode* ele = t.search(CBook(id, name, price), t.getRoot());
+            if(ele == NULL)
+                cout<<"Element not found\n";
+            else
+            {
+                cout<<"Element found. The found elemnt is\n";
+                ele->data.displayBook();
+            }
+            break;
+        }
+        case 4:
+        {
+            CNode* ele = t.findMin();
+            if(ele)
+                ele->data.displayBook();
+            else
+                cout<<"Tree is empty\n";
+            break;
+        }
+        case 5:
+        {
+            CNode* ele = t.findMax();
+            if(ele)
+                ele->data.displayBook();
+            else
+                cout<<"Tree is empty\n";
+            break;
+        }
+        case 6:
+        {
+            t.inorder(t.getRoot());
+            break;
+        }
+        case 7:
+        {
+            t.preorder(t.getRoot());
+            break;
+        }
+        case 8:
+        {
+            t.postorder(t.getRoot());
+            break;
+        }
+
+        }
+    } while (ch > 0 && ch < 9);
+    return 0;
+}

@@ -1,0 +1,515 @@
+#include<iostream>
+#include<iomanip>
+using namespace std;
+
+class CBook
+{
+        int bookId;
+        string bookName;
+        double price;
+public:
+        CBook();
+        CBook(int, string, double);
+        bool operator ==(CBook);
+        void displayBook();
+        int getId();
+        string getName();
+        double getPrice();
+};
+
+class CNode
+{
+public:
+        CBook data;
+        CNode* next;
+        CNode(CBook, CNode*);
+        CBook getData();
+        CNode* getNext();
+        void setData(CBook);
+        void setNext(CNode*);
+};
+
+class CLinkedList
+{
+        CNode* first;
+public:
+        CLinkedList(CNode*);
+        int insertAtFirst(CNode*);
+        int insertAtLast(CNode*);
+        int insertAfterElmt(CNode*, CNode*);
+        int insertByPos(CNode*, int);
+        CNode* deleteAtFirst();
+        CNode* deleteAtLast();
+        CNode* deleteByElmt(CNode*);
+        CNode* deleteBeforeElmt(CNode*);
+        CNode* accessByPos(int);
+        CNode* search(CNode*);
+        void display();
+        int isEmpty();
+        void makeEmpty();
+};
+[21bcs176@mepcolinux ex4]$cat bookimp.cpp
+#include "book.h"
+
+CBook::CBook()
+{
+        bookId = 0;
+        bookName = "";
+        price = 0;
+}
+
+CBook::CBook(int id, string n, double p)
+{
+        bookId = id;
+        bookName = n;
+        price = p;
+}
+bool CBook::operator ==(CBook b)
+{
+        return (bookId == b.bookId && bookName == b.bookName && price == b.price);
+}
+void CBook::displayBook()
+{
+        cout<<"ID: "<<bookId<<endl;
+        cout<<"Name: "<<bookName<<endl;
+        cout<<"Price: "<<price<<endl;
+}
+int CBook::getId()
+{
+        return bookId;
+}
+
+string CBook::getName()
+{
+        return bookName;
+}
+
+double CBook::getPrice()
+{
+        return price;
+}
+
+CNode::CNode(CBook d, CNode* n)
+{
+        next = n;
+        data = d;
+}
+
+CBook CNode::getData()
+{
+        return data;
+}
+
+CNode* CNode::getNext()
+{
+        return next;
+}
+
+void CNode::setNext(CNode* n)
+{
+        next = n;
+}
+
+void CNode::setData(CBook d)
+{
+        data = d;
+}
+
+CLinkedList::CLinkedList(CNode* f)
+{
+        first = f;
+}
+
+int CLinkedList::insertAtFirst(CNode* elmt)
+{
+        if(first == NULL)
+        {
+                first = elmt;
+                return 1;
+        }
+        elmt->next = first;
+        first = elmt;
+        return 1;
+}
+
+int CLinkedList::insertAtLast(CNode* elmt)
+{
+        if(first == NULL)
+        {
+                first = elmt;
+                return 1;
+        }
+        CNode* curr = first;
+        while(curr->next != NULL)
+                curr = curr->next;
+        curr->next = elmt;
+        return 1;
+}
+
+int CLinkedList::insertByPos(CNode* elmt, int pos)
+{
+        if(pos == 1)
+        {
+                return insertAtFirst(elmt);
+        }
+        if(first == NULL)return -3;
+
+        CNode* curr = first;
+        CNode* prev;
+        int position = 1;
+        while(curr)
+        {
+                if(position == pos)
+                {
+                        prev->next = elmt;
+                        elmt->next = curr;
+                        return position;
+                }
+                prev = curr;
+                curr = curr->next;
+                position++;
+        }
+        return -3;
+}
+
+
+CNode* CLinkedList::deleteAtLast()
+{
+        if(first == NULL)return NULL;
+        CNode* curr = first;
+        CNode* prev = NULL;
+        while(curr->next)
+        {
+                prev = curr;
+                curr = curr->next;
+        }
+        prev->next = NULL;
+        return curr;
+}
+
+CNode* CLinkedList::deleteAtFirst()
+{
+        if(first == NULL)return NULL;
+        CNode* temp = first;
+        first = first->next;
+        return temp;
+}
+CNode* CLinkedList::deleteByElmt(CNode* elmt)
+{
+
+        if(first == NULL)return NULL;
+        CNode* prev = NULL;
+        CNode* curr = first;
+        if(elmt->data == first->data)
+        {
+                first = first->next;
+                return curr;
+        }
+        while(curr)
+        {
+                if(curr->data == elmt->data)
+                {
+                        prev->next = curr->next;
+                        return curr;
+                }
+                prev = curr;
+                curr = curr->next;
+        }
+        return NULL;
+}
+
+CNode* CLinkedList::search(CNode* elmt)
+{
+        if(first == NULL)return NULL;
+        CNode* curr = first;
+        while(curr != NULL)
+        {
+                if(curr->data == elmt->data)
+                        return curr;
+                curr = curr->next;
+        }
+        return NULL;
+}
+
+
+CNode* CLinkedList::accessByPos(int pos)
+{
+        if(pos < 0 || first == NULL)return NULL;
+        CNode* curr = first;
+        int position = 1;
+
+        while(curr)
+        {
+                if(pos == position)return curr;
+                curr = curr->next;
+                position++;
+        }
+        return NULL;
+}
+
+CNode* CLinkedList::deleteBeforeElmt(CNode* elmt)
+{
+        if(first == NULL || elmt->data == first->data)return NULL;
+        CNode* curr = first;
+        CNode* prev;
+        while(curr->next)
+        {
+                if(curr->next->data == elmt->data)
+                {
+                        if(curr == first)
+                        {
+                                return deleteAtFirst();
+                        }
+                        prev->next = curr->next;
+                        return curr;
+                }
+                prev = curr;
+                curr = curr->next;
+        }
+        return NULL;
+}
+
+int CLinkedList::insertAfterElmt(CNode* selmt, CNode* ielmt)
+{
+        if(first == NULL)return -2;
+        CNode* curr = first;
+        while(curr)
+        {
+                if(curr->data == selmt->data)
+                {
+                        ielmt->next = curr->next;
+                        curr->next = ielmt;
+                        return 1;
+                }
+                else
+                        curr = curr->next;
+        }
+        return -3;
+}
+
+void CLinkedList::display()
+{
+        CNode* curr = first;
+        while(curr != NULL)
+        {
+                CBook d = curr->data;
+                d.displayBook();
+                curr = curr->next;
+                cout<<endl;
+        }
+}
+
+int CLinkedList::isEmpty()
+{
+        if(first == NULL)return -2;
+        return 0;
+}
+
+void CLinkedList::makeEmpty()
+{
+        first = NULL;
+}
+[21bcs176@mepcolinux ex4]$cat bookapp.cpp
+#include"book.h"
+
+int main()
+{
+        int ch;
+        CLinkedList l(NULL);
+        do
+        {       cout<<"_________________________"<<endl;
+                cout<<"BOOK MANAGEMENT SYSTEM"<<endl;
+                cout<<"_________________________"<<endl;
+                cout<<"Press 1 For Display\n";
+                cout<<"Press 2 To Insert at First\n";
+                cout<<"Press 3 To Insert at Last\n";
+                cout<<"Press 4 To Insert by Position\n";
+                cout<<"Press 5 To Insert after Element\n";
+                cout<<"Press 6 To Delete at first\n";
+                cout<<"Press 7 To Delete at last\n";
+                cout<<"Press 8 To  Delete by element\n";
+                cout<<"Press 9 To Delete before element\n";
+                cout<<"Press 10 To Search\n";
+                cout<<"Press 11 To Access\n";
+                cout<<"Press 12 To Exit\n";
+                cout<<"_________________________"<<endl;
+                cout<<"Enter your choice: ";
+                cin >> ch;
+                switch(ch)
+                {
+                case 1:
+                {
+                        l.display();
+                        cout<<"*******************************"<<endl;
+                        break;
+                }
+                case 2:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id>>name>>price;
+                        CNode* t = new CNode(CBook(id, name, price), NULL);
+                        int status = l.insertAtFirst(t);
+                        if(status == 1)
+                                cout<<"Element inserted successfully\n";
+                        else
+                                cout<<"Element not inserted\n";
+                        break;
+                }
+                case 3:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id>>name>>price;
+                        CNode *t = new CNode(CBook(id, name, price), NULL);
+                        int status = l.insertAtLast(t);
+                        if(status == 1)
+                                cout<<"Element inserted successfully\n";
+                        else
+                                cout<<"Element not inserted\n";
+                        break;
+                }
+                case 4:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id>>name>>price;
+                        CNode *t = new CNode(CBook(id, name, price), NULL);
+                        int pos;
+                        cout<<"Enter the position: ";
+                        cin>>pos;
+                        int status = l.insertByPos(t, pos);
+                        if(status >= 1)
+                                cout<<"Element inserted successfully\n";
+                        else
+                                cout<<"Element not inserted\n";
+                        break;
+                }
+                case 5:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id>>name>>price;
+                        CNode *t = new CNode(CBook(id, name, price), NULL);
+                        cout<<"Enter the id, name and price of the book to be inserted after:";
+                        cin>>id>>name>>price;
+                        CNode *after = new CNode(CBook(id, name, price), NULL);
+                        int status = l.insertAfterElmt(after, t);
+                        if(status == 1)
+                                cout<<"Element inserted succesfully\n";
+                        else
+                                cout<<"Element not inserted\n";
+                        break;
+                }
+                case 6:
+                {
+                        CNode* ele = l.deleteAtFirst();
+                        if(ele == NULL)
+                                cout<<"Element not deleted\n";
+                        else
+                        {
+                                cout<<"The deleted element is:\n";
+                                ele->getData().displayBook();
+                        }
+                        break;
+                }
+                case 7:
+                {
+                        CNode* ele = l.deleteAtLast();
+                        if(ele == NULL)
+                                cout<<"Element not deleted\n";
+                        else
+                        {
+                                cout<<"The deleted element is: \n";
+                                ele->getData().displayBook();
+                        }
+                        break;
+                }
+                case 8:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id>>name>>price;
+                        CNode *t = new CNode(CBook(id, name, price), NULL);
+                        CNode* ele = l.deleteByElmt(t);
+                        if(ele == NULL)
+                                cout<<"Element not deleted\n";
+                        else
+                        {
+                                cout<<"The deleted element is: \n";
+                                ele->getData().displayBook();
+                        }
+                        break;
+                }
+                case 9:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book to delete before: ";
+                        cin>>id>>name>>price;
+                        CNode *t = new CNode(CBook(id, name, price), NULL);
+                        CNode* ele = l.deleteBeforeElmt(t);
+                        if(ele == NULL)
+                                cout<<"Element not deleted\n";
+                        else
+                        {
+                                cout<<"The deleted element is: \n";
+                                ele->getData().displayBook();
+                        }
+                        break;
+                }
+                case 10:
+                {
+                        int id;
+                        string name;
+                        double price;
+                        cout<<"Enter the id, name and price of the book: ";
+                        cin>>id;
+                        cin>>name;
+                        cin>>price;
+                        CNode* t = new CNode(CBook(id, name, price), NULL);
+                        CNode* ele = l.search(t);
+                        if(ele == NULL)
+                                cout<<"Element not found\n";
+                        else
+                        {
+                                cout<<"The found element is:\n";
+                                ele->getData().displayBook();
+                        }
+                        delete t;
+                        delete ele;
+                        break;
+                }
+                case 11:
+                {
+                        int pos;
+                        cout<<"Enter the position to access: ";
+                        cin>>pos;
+                        CNode* ele = l.accessByPos(pos);
+                        if(ele == NULL)
+                                cout<<"Element not available\n";
+                        else
+                        {
+                                cout<<"Element is: \n";
+                                ele->getData().displayBook();
+                        }
+                        break;
+                }
+                case 12:
+                        cout<<"Exit"<<endl;
+                        break;
+                }
+        }while(ch > 0 && ch < 12);
+        return 0;
+}
