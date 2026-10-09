@@ -1,29 +1,38 @@
 /*Given an integer n. You need to recreate the pattern given below for any value of N. Let's say for N = 5, the pattern should look like as below:
 
-    *
-   ***
-  *****
- *******
-*********
-Print the pattern in the function given to you.*/
+*
+
+**
+
+***
+
+****
+
+*****
+
+****
+
+***
+
+**
+
+*
+
+Print the pattern in the function given to you. */
 class Solution {
-    public void pattern7(int n) {
-        for(int i = 0; i < n; i++){
-            for(int j=0;j < n-i-1;j++){
-                System.out.print(" ");
-            }
-            for(int j=0;j < 2*i+1;j++){
+    public void pattern10(int n) {
+        for(int i = 0; i < (2*n)-1; i++){
+            int stars= i <n ? i+1: 2*n-i-1; 
+            for(int  j = 0; j < stars; j++){
                 System.out.print("*");
             }
             System.out.println();
-            
         }
     }
-
     public static void main(String[] args){
         Solution sol = new Solution();
         int n = 5;
         System.out.println("Pattern with n = " + n + ":");
-        sol.pattern7(n);
+        sol.pattern10(n);
     }
 }
