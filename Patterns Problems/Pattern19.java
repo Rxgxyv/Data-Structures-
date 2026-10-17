@@ -39,5 +39,11 @@ class Solution {
             System.out.println();
         }
     }
-    
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        int n = 4;
+        System.out.println("Pattern with n = " + n + ":");
+        sol.pattern19(n);
+    }
+
 }
